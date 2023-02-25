@@ -2,6 +2,7 @@ package ma.enset.javafx_tp.dao.implementation;
 
 import ma.enset.javafx_tp.dao.ProductRepository;
 import ma.enset.javafx_tp.dao.connectiondb.SingletonConnectionDB;
+import ma.enset.javafx_tp.entities.Category;
 import ma.enset.javafx_tp.entities.Product;
 
 import java.sql.Connection;
@@ -47,7 +48,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         Connection connection = SingletonConnectionDB.getConnection();
         PreparedStatement preparedStatement;
         ResultSet resultSet;
-        String sqlQuery = "SELECT * FROM PRODUCT";
+        String sqlQuery = "SELECT P.*, C.name as categoryName FROM PRODUCT P INNER JOIN CATEGORY C on P.categoryId=C.categoryId";
         List<Product> products = new ArrayList<>();
         try {
             preparedStatement = connection.prepareStatement(sqlQuery);
@@ -57,13 +58,16 @@ public class ProductRepositoryImpl implements ProductRepository {
                         resultSet.getLong("productId"),
                         resultSet.getString("name"),
                         resultSet.getString("ref"),
-                        resultSet.getDouble("price")
+                        resultSet.getDouble("price"),
+                        new Category(
+                                resultSet.getLong("categoryId"),
+                                resultSet.getString("categoryName")
+                        )
                 ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return products;
     }
 
@@ -92,7 +96,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         Connection connection = SingletonConnectionDB.getConnection();
         PreparedStatement preparedStatement;
         ResultSet resultSet;
-        String sqlQuery = "UPDATE PRODUCT set name = ? set ref = ? set price = ? set categoryId = ? WHERE productId = ?";
+        String sqlQuery = "UPDATE PRODUCT set name = ?, ref = ?, price = ?, categoryId = ? WHERE productId = ?";
         try {
             preparedStatement = connection.prepareStatement(sqlQuery);
             preparedStatement.setString(1,product.getName());
@@ -127,26 +131,31 @@ public class ProductRepositoryImpl implements ProductRepository {
         Connection connection = SingletonConnectionDB.getConnection();
         PreparedStatement preparedStatement;
         ResultSet resultSet;
-        String sqlQuery = "SELECT * FROM PRODUCT WHERE name like ? or ref like ? or price like ?";
+        String sqlQuery = "SELECT P.*, C.name as categoryName FROM PRODUCT P INNER JOIN CATEGORY C on P.categoryId=C.categoryId WHERE P.name like ? or P.ref like ? or P.price like ? or C.name like ?";
         List<Product> products = new ArrayList<>();
         try {
             preparedStatement = connection.prepareStatement(sqlQuery);
+
             preparedStatement.setString(1,"%"+query+"%");
             preparedStatement.setString(2,"%"+query+"%");
             preparedStatement.setString(3,"%"+query+"%");
+            preparedStatement.setString(4,"%"+query+"%");
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()){
                 products.add(new Product(
                         resultSet.getLong("productId"),
                         resultSet.getString("name"),
                         resultSet.getString("ref"),
-                        resultSet.getDouble("price")
+                        resultSet.getDouble("price"),
+                        new Category(
+                                resultSet.getLong("categoryId"),
+                                resultSet.getString("categoryName")
+                        )
                 ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return products;
     }
 }

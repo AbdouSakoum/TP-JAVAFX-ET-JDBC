@@ -6,6 +6,6 @@ module ma.enset.javafx_tp {
 
     opens ma.enset.javafx_tp to javafx.fxml;
     opens ma.enset.javafx_tp.controller to javafx.fxml;
-    opens ma.enset.javafx_tp.entities to javafx.fxml;
+    opens ma.enset.javafx_tp.entities to javafx.base;
     exports ma.enset.javafx_tp;
 }
