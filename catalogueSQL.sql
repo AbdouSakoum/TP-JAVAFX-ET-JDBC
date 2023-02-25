@@ -1,6 +1,6 @@
 create database db_product;
 
-use db_product_test;
+use db_product;
 
 create table CATEGORY(
          categoryId BIGINT NOT NULL primary key AUTO_INCREMENT,
